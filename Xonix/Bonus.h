@@ -1,6 +1,6 @@
 #pragma once
+#include "Board.h"
 
-#include "Board.hpp"
 class Bonus
 {
 public:

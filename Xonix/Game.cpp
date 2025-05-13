@@ -1,4 +1,4 @@
-#include "Game.hpp"
+#include "Game.h"
 
 Game::Game() :
     m_window(sf::VideoMode(WIDTH_SIZE * 18, HEIGHT_SIZE * 18), "Xonix"),
