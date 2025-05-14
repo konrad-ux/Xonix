@@ -1,8 +1,5 @@
 #pragma once
 
-
-
-
 class Teleport {
 public:
     int m_x, m_y;

@@ -1,5 +1,4 @@
-#include "Enemy.hpp"
-
+#include "Enemy.h"
 #include <cstdlib>
 
 Enemy::Enemy()
