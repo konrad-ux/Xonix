@@ -131,6 +131,7 @@
     <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Teleport.cpp" />
     <ClCompile Include="Xonix.cpp" />
@@ -140,6 +141,7 @@
     <ClInclude Include="Bonus.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Teleport.h" />
   </ItemGroup>
