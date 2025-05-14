@@ -1,5 +1,4 @@
-#include "Player.hpp"
-
+#include "Player.h"
 #include <SFML/Window/Keyboard.hpp>
 
 Player::Player() : x(9), y(3), dx(0), dy(0), alive(true), win(false)

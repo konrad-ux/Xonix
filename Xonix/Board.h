@@ -1,5 +1,4 @@
 #pragma once
-
 #include <array>
 
 constexpr int HEIGHT_SIZE = 25;     //zmienne stale podczas kompilacji(rozmiary okna i kafelka)

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Board.hpp"
-#include "Enemy.hpp"
-#include "Player.hpp"
-#include "Bonus.hpp"
-#include "Teleport.hpp"
+#include "Board.h"
+#include "Enemy.h"
+#include "Player.h"
+#include "Bonus.h"
+#include "Teleport.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
