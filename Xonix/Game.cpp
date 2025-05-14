@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "menu.h"
 
 Game::Game() :
     m_window(sf::VideoMode(WIDTH_SIZE * 18, HEIGHT_SIZE * 18), "Xonix"),
@@ -8,28 +9,28 @@ Game::Game() :
     m_window.setFramerateLimit(60);
 
 
-    m_t1.loadFromFile("images/solid_tileset.png");
-    m_t2.loadFromFile("images/gameover.png");
-    m_t3.loadFromFile("images/duch.png");
-    m_t4.loadFromFile("images/small_bomb.png");
-    m_t5.loadFromFile("images/youwin.png");
-    m_t6.loadFromFile("images/portal.png");
+    m_t1.loadFromFile("solid_tileset.png");
+    m_t2.loadFromFile("gameover.png");
+    m_t3.loadFromFile("duch.png");
+    m_t4.loadFromFile("small_bomb.png");
+    m_t5.loadFromFile("youwin.png");
+    m_t6.loadFromFile("portal.png");
 
 
 
-    if (!m_teleportSoundBuffer.loadFromFile("sounds/teleport_sound.wav")) {
+    if (!m_teleportSoundBuffer.loadFromFile("teleport_sound.wav")) {
         std::cerr << "Nie udal sie zaladowac pliku dzwiekowego teleport.wav!" << std::endl;
     }
     m_teleportSound.setBuffer(m_teleportSoundBuffer);
     m_teleportSound.setVolume(20);
 
-    if (!m_winningSoundBuffer.loadFromFile("sounds/winning_sound.wav")) {
+    if (!m_winningSoundBuffer.loadFromFile("winning_sound.wav")) {
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego winning.wav!" << std::endl;
     }
     m_winningSound.setBuffer(m_winningSoundBuffer);
     m_winningSound.setVolume(30);
 
-    if (!m_gameoverSoundBuffer.loadFromFile("sounds/game_over_sound.wav")) {
+    if (!m_gameoverSoundBuffer.loadFromFile("game_over_sound.wav")) {
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego game_over_sound.wav!" << std::endl;
     }
     m_gameoverSound.setBuffer(m_gameoverSoundBuffer);
@@ -51,7 +52,7 @@ Game::Game() :
 
 
 
-    if (!m_font.loadFromFile("font/agency_fb.ttf")) // sciezka do pliku czcionki
+    if (!m_font.loadFromFile("agency_fb.ttf")) // sciezka do pliku czcionki
     {
         std::cerr << "Nie udalo sie zaladowac czcionki!" << std::endl;
     }
@@ -64,71 +65,106 @@ Game::Game() :
     }
 }
 
-void Game::run()
-{
-    while (m_window.isOpen())
-    {
-        const float time = m_clock.getElapsedTime().asSeconds();
+void Game::run() {
+    while (m_window.isOpen()) {
+        // ----------- MENU ----------
+        Menu menu(m_window.getSize().x, m_window.getSize().y);
+        bool inMenu = true;
+
+        while (inMenu && m_window.isOpen()) {
+            sf::Event event;
+            while (m_window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    m_window.close();
+
+                if (event.type == sf::Event::KeyPressed) {
+                    if (event.key.code == sf::Keyboard::Up)
+                        menu.moveUp();
+                    else if (event.key.code == sf::Keyboard::Down)
+                        menu.moveDown();
+                    else if (event.key.code == sf::Keyboard::Enter) {
+                        int selected = menu.getSelectedItemIndex();
+                        if (selected == 0) { // Start Game
+                            inMenu = false;
+                        }
+                        else if (selected == 1) { // Exit
+                            m_window.close();
+                        }
+                    }
+                }
+            }
+
+            m_window.clear();
+            menu.draw(m_window);
+            m_window.display();
+        }
+
+
+        m_board.reset();
+        m_player = Player();
+        m_bonuses.clear();
+        m_enemies.clear();
+        for (int i = 0; i < 4; ++i) {
+            m_enemies.emplace_back();
+        }
+        m_player.alive = true;
+        m_player.win = false;
+
         m_clock.restart();
-        m_timer += time;
+        m_timer = 0;
 
-        handleEvents();
+        while (m_window.isOpen() && m_player.alive && !m_player.win) {
+            const float time = m_clock.getElapsedTime().asSeconds();
+            m_clock.restart();
+            m_timer += time;
 
+            handleEvents();
 
-
-        if (tenSecondsClock.getElapsedTime().asSeconds() >= 7)
-        {
-            int randomX = rand() % (WIDTH_SIZE - 2) + 1;
-            int randomY = rand() % (HEIGHT_SIZE - 2) + 1;
-            m_bonuses.emplace_back(randomX, randomY);
-            tenSecondsClock.restart();
-        }
-
-
-        checkPlayerBonusCollision(m_player);
-        checkPlayerTeleportCollision(m_player, m_teleport1, m_teleport2);
-
-
-
-        if (!m_player.alive)
-        {
-            m_window.draw(m_gameOver);
-            continue;
-        }
-
-        m_player.handleInput();
-        m_player.move(m_board, m_timer, m_delay);
-
-
-        for (auto& enemy : m_enemies)          //metoda move dla kazego enemy
-        {
-            enemy.move(m_board.grid);
-        }
-
-        if (m_board.grid[m_player.y][m_player.x] == 1)     //obsluga zamykania zamalowanego pola
-        {
-            m_player.dx = m_player.dy = 0;
-            for (const auto& enemy : m_enemies)
-            {
-                m_board.drop(enemy.y / 18, enemy.x / 18);
+            if (tenSecondsClock.getElapsedTime().asSeconds() >= 7) {
+                int randomX = rand() % (WIDTH_SIZE - 2) + 1;
+                int randomY = rand() % (HEIGHT_SIZE - 2) + 1;
+                m_bonuses.emplace_back(randomX, randomY);
+                tenSecondsClock.restart();
             }
-            m_board.finalize();
-        }
 
-        for (const auto& enemy : m_enemies)
-        {
-            if (m_board.grid[enemy.y / 18][enemy.x / 18] == 2)     //kolizja sladu gracza z enemy
-            {
-                m_window.draw(m_gameOver);
-                m_player.alive = false;
+            checkPlayerBonusCollision(m_player);
+            checkPlayerTeleportCollision(m_player, m_teleport1, m_teleport2);
 
+            m_player.handleInput();
+            m_player.move(m_board, m_timer, m_delay);
+
+            for (auto& enemy : m_enemies) {
+                enemy.move(m_board.grid);
             }
+
+            if (m_board.grid[m_player.y][m_player.x] == 1) {
+                m_player.dx = m_player.dy = 0;
+                for (const auto& enemy : m_enemies) {
+                    m_board.drop(enemy.y / 18, enemy.x / 18);
+                }
+                m_board.finalize();
+            }
+
+            for (const auto& enemy : m_enemies) {
+                if (m_board.grid[enemy.y / 18][enemy.x / 18] == 2) {
+                    m_player.alive = false;
+                }
+            }
+
+            draw();
         }
 
+        // ----------- GAME OVER / WIN -----------
+        sf::Clock endClock;
+        while (endClock.getElapsedTime().asSeconds() < 3.0f && m_window.isOpen()) {
+            m_window.clear();
+            draw();
+            m_window.display();
+        }
 
-        draw();
     }
 }
+
 
 void Game::handleEvents()
 {
