@@ -3,10 +3,10 @@
 Menu::Menu(float width, float height)
     : selectedItemIndex(0)
 {
-    if (!font.loadFromFile("agency_fb.ttf"))
+    if (!font.loadFromFile("font/agency_fb.ttf"))
         std::cerr << "B³¹d ³adowania czcionki agency_fb.ttf\n";
 
-    if (!backgroundTexture.loadFromFile("menu2.png"))
+    if (!backgroundTexture.loadFromFile("images/menu2.png"))
         std::cerr << "B³¹d ³adowania t³a menu2.png\n";
     backgroundSprite.setTexture(backgroundTexture);
 

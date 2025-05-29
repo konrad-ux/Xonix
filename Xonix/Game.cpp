@@ -1,6 +1,6 @@
 #include "Game.h"
 #include "menu.h"
-#include <fstream>  // do zapisu/odczytu pliku
+#include <fstream>
 #include <algorithm> 
 
 Game::Game() :
@@ -10,34 +10,38 @@ Game::Game() :
     srand(time(nullptr));
     m_window.setFramerateLimit(60);
 
-    m_t1.loadFromFile("solid_tileset.png");
-    m_t2.loadFromFile("gameover.png");
-    m_t3.loadFromFile("duch.png");
-    m_t4.loadFromFile("small_bomb.png");
-    m_t5.loadFromFile("youwin.png");
-    m_t6.loadFromFile("portal.png");
+    m_t1.loadFromFile("images/solid_tileset.png");
+    m_t2.loadFromFile("images/gameover.png");
+    m_t3.loadFromFile("images/duch.png");
+    m_t4.loadFromFile("images/small_bomb.png");
+    m_t5.loadFromFile("images/youwin.png");
+    m_t6.loadFromFile("images/portal.png");
 
-    if (!m_menuBackgroundTexture.loadFromFile("menu3.png")) {
+    if (!m_menuBackgroundTexture.loadFromFile("images/menu3.png")) {
         std::cerr << "B³¹d ³adowania t³a menu3.png\n";
-
     }
     m_menuBackgroundSprite.setTexture(m_menuBackgroundTexture);
 
-    if (!m_teleportSoundBuffer.loadFromFile("teleport_sound.wav")) {
+    if (!m_teleportSoundBuffer.loadFromFile("sounds/teleport_sound.wav")) {
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego teleport.wav!" << std::endl;
     }
     m_teleportSound.setBuffer(m_teleportSoundBuffer);
     m_teleportSound.setVolume(20);
 
-    if (!m_winningSoundBuffer.loadFromFile("winning_sound.wav")) {
+    if (!m_winningSoundBuffer.loadFromFile("sounds/winning_sound.wav")) {
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego winning.wav!" << std::endl;
     }
     m_winningSound.setBuffer(m_winningSoundBuffer);
     m_winningSound.setVolume(30);
 
-    if (!m_gameoverSoundBuffer.loadFromFile("game_over_sound.wav")) {
+    if (!m_gameoverSoundBuffer.loadFromFile("sounds/game_over_sound.wav")) {
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego game_over_sound.wav!" << std::endl;
     }
+
+    if (!m_font.loadFromFile("font/agency_fb_bold.ttf")) {
+        std::cerr << "Nie udalo sie zaladowac czcionki!" << std::endl;
+    }
+
     m_gameoverSound.setBuffer(m_gameoverSoundBuffer);
     m_gameoverSound.setVolume(30);
 
@@ -52,10 +56,6 @@ Game::Game() :
     m_bonus.setOrigin(9, 9);
     s_teleport1.setTexture(m_t6);
     s_teleport2.setTexture(m_t6);
-
-    if (!m_font.loadFromFile("agency_fb.ttf")) {
-        std::cerr << "Nie udalo sie zaladowac czcionki!" << std::endl;
-    }
 
     for (int i = 0; i < 4; ++i) {
         m_enemies.emplace_back();
