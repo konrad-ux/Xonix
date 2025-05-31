@@ -22,7 +22,7 @@ Game::Game() :
     }
     m_menuBackgroundSprite.setTexture(m_menuBackgroundTexture);
 
-    if (!m_teleportSoundBuffer.loadFromFile("sounds/teleport_sound.wav")) {
+    if (!m_teleportSoundBuffer.loadFromFile("sounds/teleport_sound.wav")){
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego teleport.wav!" << std::endl;
     }
     m_teleportSound.setBuffer(m_teleportSoundBuffer);
@@ -37,11 +37,6 @@ Game::Game() :
     if (!m_gameoverSoundBuffer.loadFromFile("sounds/game_over_sound.wav")) {
         std::cerr << "Nie udalo sie zaladowac pliku dzwiekowego game_over_sound.wav!" << std::endl;
     }
-
-    if (!m_font.loadFromFile("font/agency_fb_bold.ttf")) {
-        std::cerr << "Nie udalo sie zaladowac czcionki!" << std::endl;
-    }
-
     m_gameoverSound.setBuffer(m_gameoverSoundBuffer);
     m_gameoverSound.setVolume(30);
 
@@ -56,6 +51,10 @@ Game::Game() :
     m_bonus.setOrigin(9, 9);
     s_teleport1.setTexture(m_t6);
     s_teleport2.setTexture(m_t6);
+
+    if (!m_font.loadFromFile("font/agency_fb_bold.ttf")) {
+        std::cerr << "Nie udalo sie zaladowac czcionki!" << std::endl;
+    }
 
     for (int i = 0; i < 4; ++i) {
         m_enemies.emplace_back();
@@ -160,7 +159,7 @@ void Game::run() {
 
         // Ekran GAME OVER/WIN i zapis wyniku
         sf::Clock endClock;
-        while (endClock.getElapsedTime().asSeconds() < 3.0f && m_window.isOpen()) {
+        while (endClock.getElapsedTime().asSeconds() < 2.0f && m_window.isOpen()) {
             m_window.clear();
             draw();
             m_window.display();
@@ -446,9 +445,9 @@ void Game::showHighScores() {
     sf::Text title;
     title.setFont(m_font);
     title.setCharacterSize(50);
-    title.setFillColor(sf::Color::Cyan);
-    title.setString("Tablica wynikow");
-    title.setPosition(200, 50);
+    title.setFillColor(sf::Color::White);
+    title.setString("Top 5");
+    title.setPosition(320, 100);
     texts.push_back(title);
 
     for (size_t i = 0; i < highs.size(); ++i) {
@@ -459,7 +458,7 @@ void Game::showHighScores() {
         t.setString(
             std::to_string(i + 1) + ". " + highs[i].name + " - " + std::to_string(highs[i].score) + "%"
         );
-        t.setPosition(150, 150 + i * 50);
+        t.setPosition(150, 180 + i * 50);
         texts.push_back(t);
     }
 

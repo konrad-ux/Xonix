@@ -5,7 +5,7 @@
 class Menu
 {
 private:
-    static const int MAX_ITEMS = 3;       // teraz 3 pozycje
+    static const int MAX_ITEMS = 3;
     int selectedItemIndex;
     sf::Font font;
     sf::Text menu[MAX_ITEMS];

@@ -4,7 +4,7 @@
 #include "Enemy.h"  
 #include "Player.h"  
 #include "Bonus.h"  
-#include "Teleport.h"  
+#include "Teleport.h"
 
 #include <SFML/Graphics.hpp>  
 #include <SFML/Window.hpp>  
@@ -42,7 +42,7 @@ private:
 	int loadLastScoreFromFile(); // Deklaracja brakuj¹cej funkcji  
 
 private:
-	Board                   m_board;
+	Board                  m_board;
 	Player                  m_player;
 	Teleport                m_teleport1;
 	Teleport                m_teleport2;
