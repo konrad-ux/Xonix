@@ -66,3 +66,4 @@ void Player::handleInput()
         dx = 0; dy = 1;
     }
 }
+

@@ -16,6 +16,7 @@ Game::Game() :
     m_t4.loadFromFile("images/small_bomb.png");
     m_t5.loadFromFile("images/youwin.png");
     m_t6.loadFromFile("images/portal.png");
+	m_t7.loadFromFile("images/apple (2).png");
 
     if (!m_menuBackgroundTexture.loadFromFile("images/menu3.png")) {
         std::cerr << "B³¹d ³adowania t³a menu3.png\n";
@@ -49,6 +50,7 @@ Game::Game() :
     m_enemy.setOrigin(20, 20);
     m_bonus.setTexture(m_t4);
     m_bonus.setOrigin(9, 9);
+	m_speedBonusSprite.setTexture(m_t7);
     s_teleport1.setTexture(m_t6);
     s_teleport2.setTexture(m_t6);
 
@@ -102,6 +104,7 @@ void Game::run() {
         m_board.reset();
         m_player = Player();
         m_bonuses.clear();
+		m_speedBonuses.clear();
         m_enemies.clear();
         for (int i = 0; i < 4; ++i)
             m_enemies.emplace_back();
@@ -123,7 +126,17 @@ void Game::run() {
                 tenSecondsClock.restart();
             }
 
+            if (m_speedBonusClock.getElapsedTime().asSeconds() >= m_speedBonusSpawnInterval) {
+                int randomX = rand() % (WIDTH_SIZE - 2) + 1;
+                int randomY = rand() % (HEIGHT_SIZE - 2) + 1;
+                m_speedBonuses.emplace_back(randomX, randomY);
+                m_speedBonusClock.restart();
+            }
+
+
+
             checkPlayerBonusCollision(m_player);
+            checkPlayerSpeedBonusCollision(m_player);
             checkPlayerTeleportCollision(m_player, m_teleport1, m_teleport2);
 
             m_player.handleInput();
@@ -250,6 +263,11 @@ void Game::draw() {
         m_window.draw(m_enemy);
     }
 
+    for (const auto& speedBonus : m_speedBonuses) {
+        m_speedBonusSprite.setPosition(speedBonus.getX() * 18, speedBonus.getY() * 18);
+        m_window.draw(m_speedBonusSprite);
+    }
+
     if (!m_player.alive) {
         m_window.draw(m_gameOver);
     }
@@ -325,7 +343,38 @@ void Game::checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Tel
     }
 }
 
-// NOWE FUNKCJE — zapis/odczyt z pliku
+void Game::checkPlayerSpeedBonusCollision(Player& player) {
+    sf::FloatRect playerBounds(player.x * 18, player.y * 18, 18, 18);
+
+    // Handle active speed bonus effect
+    if (m_speedBonusActive) {
+        m_speedBonusTimer += m_clock.getElapsedTime().asSeconds();
+        if (m_speedBonusTimer >= m_speedBonusDuration) {
+            if (m_activeSpeedBonus) {
+                m_activeSpeedBonus->resetSpeedBonus(player);
+                m_activeSpeedBonus = nullptr;
+            }
+            m_speedBonusActive = false;
+            m_speedBonusTimer = 0.f;
+        }
+        return;
+    }
+
+    // Check collision with any available speed bonus
+    for (auto it = m_speedBonuses.begin(); it != m_speedBonuses.end(); ++it) {
+        sf::FloatRect bonusBounds(it->getX() * 18, it->getY() * 18, 18, 18);
+        if (playerBounds.intersects(bonusBounds)) {
+            it->applySpeedBonus(player);
+            m_speedBonusActive = true;
+            m_speedBonusTimer = 0.f;
+            m_activeSpeedBonus = &(*it);
+            // Optionally play a sound here, e.g. m_speedBonusSound.play();
+            m_speedBonuses.erase(it); // Remove the bonus from the board
+            break;
+        }
+    }
+}
+
 void Game::saveScoreToFile(const std::string& name, int score)
 {
     std::ofstream file("score.txt", std::ios::app);
@@ -337,7 +386,6 @@ void Game::saveScoreToFile(const std::string& name, int score)
         std::cerr << "Nie mo¿na zapisaæ wyniku do pliku!" << std::endl;
     }
 }
-
 
 int Game::loadLastScoreFromFile() {
     std::ifstream file("score.txt");
@@ -367,8 +415,6 @@ int Game::loadLastScoreFromFile() {
 
     return score;
 }
-
-
 
 std::string Game::askPlayerName()
 {
@@ -437,7 +483,6 @@ std::vector<ScoreEntry> Game::loadHighScores() {
     return all;
 }
 
-// Wyœwietlenie ekranu z 5 najlepszymi wynikami
 void Game::showHighScores() {
     auto highs = loadHighScores();
     std::vector<sf::Text> texts;

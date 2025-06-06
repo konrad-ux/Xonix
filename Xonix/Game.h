@@ -4,7 +4,8 @@
 #include "Enemy.h"  
 #include "Player.h"  
 #include "Bonus.h"  
-#include "Teleport.h"
+#include "Teleport.h" 
+#include "SpeedBonus.h"
 
 #include <SFML/Graphics.hpp>  
 #include <SFML/Window.hpp>  
@@ -31,6 +32,7 @@ private:
 	void handleEvents();
 	void draw();
 	void checkPlayerBonusCollision(Player& player);
+	void checkPlayerSpeedBonusCollision(Player& m_player);
 	void checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Teleport& teleport2);
 	int calculatePaintedFields();
 
@@ -46,11 +48,16 @@ private:
 	Player                  m_player;
 	Teleport                m_teleport1;
 	Teleport                m_teleport2;
+	SpeedBonus* m_activeSpeedBonus = nullptr;
 	std::vector<Enemy>      m_enemies;
 	std::vector<Bonus>      m_bonuses;
+	std::vector<SpeedBonus> m_speedBonuses;
+	bool m_speedBonusActive = false;
+	float m_speedBonusTimer = 0.f;
+	float m_speedBonusDuration = 5.f;
 
-	sf::Texture             m_t1, m_t2, m_t3, m_t4, m_t5, m_t6;
-	sf::Sprite              m_tile, m_gameOver, m_enemy, m_bonus, m_win, s_teleport1, s_teleport2;
+	sf::Texture             m_t1, m_t2, m_t3, m_t4, m_t5, m_t6, m_t7;
+	sf::Sprite              m_tile, m_gameOver, m_enemy, m_bonus, m_win, s_teleport1, s_teleport2, m_speedBonusSprite;
 	sf::Font                m_font;
 	sf::Text                percentageText;
 	sf::SoundBuffer         m_teleportSoundBuffer;
@@ -62,7 +69,7 @@ private:
 
 	sf::RenderWindow        m_window;
 
-	sf::Clock               m_clock, tenSecondsClock;
+	sf::Clock               m_clock, tenSecondsClock, m_speedBonusClock;
 	float                   m_timer, m_delay;
 	int                     paintedFields;
 
@@ -71,4 +78,5 @@ private:
 	sf::Sprite              m_menuBackgroundSprite;
 	std::vector<ScoreEntry> m_highScores;
 	bool                    m_newHighScore;
+	float m_speedBonusSpawnInterval = 15.f;
 };
