@@ -1,6 +1,7 @@
 #pragma once
+#include "Bonus.h"
 
-class Teleport {
+class Teleport: public Bonus {
 public:
     int m_x, m_y;
 

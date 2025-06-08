@@ -31,9 +31,11 @@ public:
 private:
 	void handleEvents();
 	void draw();
-	void checkPlayerBonusCollision(Player& player);
-	void checkPlayerSpeedBonusCollision(Player& m_player);
+	//void checkPlayerBonusCollision(Player& player);
+	//void checkPlayerSpeedBonusCollision(Player& m_player);
 	void checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Teleport& teleport2);
+	template<typename TBonus, typename TEffect>
+	void checkPlayerBonusCollisionGeneric(Player& player, std::vector<TBonus>& bonuses, TEffect effect);
 	int calculatePaintedFields();
 
 	std::vector<ScoreEntry> loadHighScores();    // ³aduje i sortuje top 5

@@ -135,9 +135,39 @@ void Game::run() {
 
 
 
-            checkPlayerBonusCollision(m_player);
-            checkPlayerSpeedBonusCollision(m_player);
+            //checkPlayerBonusCollision(m_player);
+            //checkPlayerSpeedBonusCollision(m_player);
             checkPlayerTeleportCollision(m_player, m_teleport1, m_teleport2);
+            // Zwyk³y bonus
+            checkPlayerBonusCollisionGeneric(m_player, m_bonuses, [this](Bonus&, Player&) {
+                m_board.reset();
+                m_player = Player();
+                m_gameoverSound.play();
+                });
+
+            // SpeedBonus
+            checkPlayerBonusCollisionGeneric(m_player, m_speedBonuses, [this](SpeedBonus& speedBonus, Player& player) {
+                if (!m_speedBonusActive) {
+                    speedBonus.applySpeedBonus(player);
+                    m_speedBonusActive = true;
+                    m_speedBonusTimer = 0.f;
+                    m_activeSpeedBonus = &speedBonus;
+                    // Mo¿esz dodaæ dŸwiêk: m_speedBonusSound.play();
+                }
+                });
+
+            if (m_speedBonusActive) {
+                m_speedBonusTimer += m_clock.getElapsedTime().asSeconds();
+                if (m_speedBonusTimer >= m_speedBonusDuration) {
+                    if (m_activeSpeedBonus) {
+                        m_activeSpeedBonus->resetSpeedBonus(m_player);
+                        m_activeSpeedBonus = nullptr;
+                    }
+                    m_speedBonusActive = false;
+                    m_speedBonusTimer = 0.f;
+                }
+            }
+
 
             m_player.handleInput();
             m_player.move(m_board, m_timer, m_delay);
@@ -300,7 +330,7 @@ int Game::calculatePaintedFields() {
 
     return score;
 }
-
+/*
 void Game::checkPlayerBonusCollision(Player& player) {
     sf::FloatRect playerBounds = m_tile.getGlobalBounds();
 
@@ -320,6 +350,42 @@ void Game::checkPlayerBonusCollision(Player& player) {
         }
     }
 }
+*/
+template<typename TBonus, typename TEffect>
+void Game::checkPlayerBonusCollisionGeneric(Player& player, std::vector<TBonus>& bonuses, TEffect effect)
+{
+    // Ustaw sprite gracza na aktualn¹ pozycjê (tak jak w draw)
+    m_tile.setTextureRect(sf::IntRect(0, 18, 18, 18));
+    m_tile.setPosition(player.x * 18, player.y * 18);
+    sf::FloatRect playerBounds = m_tile.getGlobalBounds();
+
+    for (auto it = bonuses.begin(); it != bonuses.end(); ) {
+        // Ustaw sprite bonusu na aktualn¹ pozycjê
+        if constexpr (std::is_same<TBonus, SpeedBonus>::value) {
+            m_speedBonusSprite.setPosition(it->getX() * 18, it->getY() * 18);
+            sf::FloatRect bonusBounds = m_speedBonusSprite.getGlobalBounds();
+            if (playerBounds.intersects(bonusBounds)) {
+                effect(*it, player);
+                it = bonuses.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        else {
+            m_bonus.setPosition(it->getX() * 18, it->getY() * 18);
+            sf::FloatRect bonusBounds = m_bonus.getGlobalBounds();
+            if (playerBounds.intersects(bonusBounds)) {
+                effect(*it, player);
+                it = bonuses.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+    }
+}
+
 
 void Game::checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Teleport& teleport2) {
     static bool isTeleported = false;
@@ -342,7 +408,7 @@ void Game::checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Tel
         isTeleported = false;
     }
 }
-
+/*
 void Game::checkPlayerSpeedBonusCollision(Player& player) {
     sf::FloatRect playerBounds(player.x * 18, player.y * 18, 18, 18);
 
@@ -374,7 +440,7 @@ void Game::checkPlayerSpeedBonusCollision(Player& player) {
         }
     }
 }
-
+*/
 void Game::saveScoreToFile(const std::string& name, int score)
 {
     std::ofstream file("score.txt", std::ios::app);
