@@ -449,7 +449,3 @@ void Game::showHighScores() {
         m_window.display();
     }
 }
-
-int Game::loadLastScoreFromFile() {
-    return 0; // Ta metoda nie jest u¿ywana, mo¿na j¹ zaimplementowaæ w przysz³oœci
-}
