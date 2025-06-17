@@ -141,7 +141,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Base.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="Bonus.cpp" />
@@ -156,7 +155,6 @@
     <ClCompile Include="Xonix.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Base.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="Bonus.h" />

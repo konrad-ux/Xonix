@@ -49,7 +49,7 @@ Game::Game() :
         m_textureManager.load("portal", "images/portal.png");
         m_textureManager.load("speed_bonus", "images/apple (2).png");
         m_textureManager.load("immunity_bonus", "images/banana.png");
-        m_textureManager.load("menu_bg", "images/menu3.png");
+        m_textureManager.load("menu_bg", "images/background.png");
 
         m_fontManager.load("main_font", "font/agency_fb_bold.ttf");
 
@@ -65,7 +65,7 @@ Game::Game() :
     // Ustawienie zasobów do obiektów gry
     m_tile.setTexture(m_textureManager.get("tileset"));
     m_gameOver.setTexture(m_textureManager.get("gameover"));
-    m_gameOver.setPosition(100.f, 100.f);
+    m_gameOver.setPosition(125.f, 250.f);
     m_win.setTexture(m_textureManager.get("win"));
     m_win.setPosition(100.f, 0.f);
     m_enemy.setTexture(m_textureManager.get("enemy"));
@@ -347,10 +347,10 @@ std::string Game::askPlayerName() {
     sf::Text prompt, inputText;
     prompt.setFont(m_fontManager.get("main_font"));
     inputText.setFont(m_fontManager.get("main_font"));
-    prompt.setCharacterSize(30); inputText.setCharacterSize(30);
+    prompt.setCharacterSize(45); inputText.setCharacterSize(40);
     prompt.setFillColor(sf::Color::White); inputText.setFillColor(sf::Color::Yellow);
-    prompt.setString("Podaj imie:");
-    prompt.setPosition(150.f, 200.f); inputText.setPosition(150.f, 250.f);
+    prompt.setString("Enter your name:");
+    prompt.setPosition(230.f, 350.f); inputText.setPosition(300.f, 450.f);
     std::string input;
     while (m_window.isOpen()) {
         sf::Event event;
@@ -400,12 +400,12 @@ void Game::showHighScores() {
     std::vector<sf::Text> texts;
     sf::Text title;
     title.setFont(m_fontManager.get("main_font"));
-    title.setCharacterSize(50);
+    title.setCharacterSize(70);
     title.setFillColor(sf::Color::White);
     title.setString("Top 5");
     sf::FloatRect textRect = title.getLocalBounds();
     title.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    title.setPosition(m_window.getSize().x / 2.0f, 100.f);
+    title.setPosition(m_window.getSize().x / 2.0f, 330.f);
     texts.push_back(title);
 
     for (size_t i = 0; i < highs.size(); ++i) {
@@ -418,7 +418,7 @@ void Game::showHighScores() {
         ss << i + 1 << ". " << highs[i]; // U¿ycie przeci¹¿onego operatora
         t.setString(ss.str());
 
-        t.setPosition(150.f, 180.f + static_cast<float>(i * 50));
+        t.setPosition(250.f, 390.f + static_cast<float>(i * 50));
         texts.push_back(t);
     }
 
@@ -429,7 +429,7 @@ void Game::showHighScores() {
     back.setString("Wcisnij Esc lub Enter, aby wrocic");
     sf::FloatRect backRect = back.getLocalBounds();
     back.setOrigin(backRect.left + backRect.width / 2.0f, backRect.top + backRect.height / 2.0f);
-    back.setPosition(m_window.getSize().x / 2.0f, 500.f);
+    back.setPosition(m_window.getSize().x / 2.0f, 670.f);
 
     bool showingScores = true;
     while (m_window.isOpen() && showingScores) {

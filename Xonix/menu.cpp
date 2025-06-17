@@ -6,27 +6,27 @@ Menu::Menu(float width, float height)
     if (!font.loadFromFile("font/agency_fb.ttf"))
         std::cerr << "B³¹d ³adowania czcionki agency_fb.ttf\n";
 
-    if (!backgroundTexture.loadFromFile("images/menu2.png"))
+    if (!backgroundTexture.loadFromFile("images/background.png"))
         std::cerr << "B³¹d ³adowania t³a menu2.png\n";
     backgroundSprite.setTexture(backgroundTexture);
 
     menu[0].setFont(font);
     menu[0].setFillColor(sf::Color::Red);
-    menu[0].setString("Start");
-    menu[0].setCharacterSize(40);
-    menu[0].setPosition(width / 2 - 50, height / 2 - 80);
+    menu[0].setString("Play");
+    menu[0].setCharacterSize(60);
+    menu[0].setPosition(width / 2 - 45, height / 2 - 40);
 
     menu[1].setFont(font);
     menu[1].setFillColor(sf::Color::White);
-    menu[1].setString("Tablica wyników");
-    menu[1].setCharacterSize(40);
-    menu[1].setPosition(width / 2 - 100, height / 2 - 20);
+    menu[1].setString("High Scores");
+    menu[1].setCharacterSize(60);
+    menu[1].setPosition(width / 2 - 110, height / 2 + 50);
 
     menu[2].setFont(font);
     menu[2].setFillColor(sf::Color::White);
     menu[2].setString("Exit");
-    menu[2].setCharacterSize(40);
-    menu[2].setPosition(width / 2 - 50, height / 2 + 40);
+    menu[2].setCharacterSize(60);
+    menu[2].setPosition(width / 2 - 35, height / 2 + 140);
 }
 
 void Menu::draw(sf::RenderWindow& window)
