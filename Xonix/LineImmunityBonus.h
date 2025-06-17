@@ -1,11 +1,13 @@
 #pragma once
 #include "Bonus.h"
-#include "Player.h"
+
+// Forward-declaration, ¿eby unikn¹æ do³¹czania ca³ego Player.h
+class Player;
 
 class LineImmunityBonus : public Bonus {
 public:
     LineImmunityBonus(int x, int y);
 
-    void applyEffect(Player& player);
-    void removeEffect(Player& player);
+    // ZMIANA: Deklaracja nadpisania metody wirtualnej.
+    void applyEffect(Player& player, Game& game) override;
 };

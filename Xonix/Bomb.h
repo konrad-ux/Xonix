@@ -1,8 +1,8 @@
 #pragma once
 #include "Bonus.h"
 
-class Teleport : public Bonus {
+class Bomb : public Bonus {
 public:
-    Teleport(int x, int y);
+    Bomb(int x, int y);
     void applyEffect(Player& player, Game& game) override;
 };

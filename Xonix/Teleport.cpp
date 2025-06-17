@@ -1,17 +1,11 @@
-#include"Teleport.h"
-
-
+#include "Teleport.h"
 
 Teleport::Teleport(int x, int y)
-    : Bonus(x, y), m_x(x), m_y(y)
+    : Bonus(x, y)
 {
 }
 
-
-
-
-void Teleport::setPosition(int x, int y)
+void Teleport::applyEffect(Player& player, Game& game)
 {
-    m_x = x;
-    m_y = y;
+    // Puste, logika jest w Game::checkPlayerTeleportCollision
 }

@@ -143,12 +143,14 @@
   <ItemGroup>
     <ClCompile Include="Base.cpp" />
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="LineImmunityBonus.cpp" />
     <ClCompile Include="menu.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SpeedBonus.cpp" />
     <ClCompile Include="Teleport.cpp" />
     <ClCompile Include="Xonix.cpp" />
@@ -156,12 +158,14 @@
   <ItemGroup>
     <ClInclude Include="Base.h" />
     <ClInclude Include="Board.h" />
+    <ClInclude Include="Bomb.h" />
     <ClInclude Include="Bonus.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="LineImmunityBonus.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SpeedBonus.h" />
     <ClInclude Include="Teleport.h" />
   </ItemGroup>

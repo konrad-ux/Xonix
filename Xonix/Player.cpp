@@ -1,46 +1,32 @@
 #include "Player.h"
 #include <SFML/Window/Keyboard.hpp>
 
-Player::Player() : x(9), y(3), dx(0), dy(0), alive(true), win(false), isImmune(false) // Inicjalizacja isImmune
+Player::Player() :
+    m_x(9), m_y(3), m_dx(0), m_dy(0),
+    m_alive(true), m_win(false), m_isImmune(false)
 {
-    //puste cialo
 }
 
 void Player::move(Board& board, float& timer, const float delay)
 {
     if (timer > delay)
     {
-        x += dx;
-        y += dy;
+        m_x += m_dx;
+        m_y += m_dy;
 
-        if (x < 0)
+        if (m_x < 0) m_x = 0;
+        if (m_x >= WIDTH_SIZE) m_x = WIDTH_SIZE - 1;
+        if (m_y < 0) m_y = 0;
+        if (m_y >= HEIGHT_SIZE) m_y = HEIGHT_SIZE - 1;
+
+        if (board.grid[m_y][m_x] == 2 && !m_isImmune)
         {
-            x = 0;
+            m_alive = false;
         }
 
-        if (x >= WIDTH_SIZE)
+        if (board.grid[m_y][m_x] == 0)
         {
-            x = WIDTH_SIZE - 1;
-        }
-
-        if (y < 0)
-        {
-            y = 0;
-        }
-
-        if (y >= HEIGHT_SIZE)
-        {
-            y = HEIGHT_SIZE - 1;
-        }
-
-        if (board.grid[y][x] == 2 && !isImmune)     // Kolizja z w³asnym œladem tylko, gdy gracz nie jest nietykalny
-        {
-            alive = false;
-        }
-
-        if (board.grid[y][x] == 0)     //tworzenie sladu
-        {
-            board.grid[y][x] = 2;
+            board.grid[m_y][m_x] = 2;
         }
 
         timer = 0;
@@ -51,18 +37,41 @@ void Player::handleInput()
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
     {
-        dx = -1; dy = 0;
+        m_dx = -1; m_dy = 0;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
-        dx = 1; dy = 0;
+        m_dx = 1; m_dy = 0;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     {
-        dx = 0; dy = -1;
+        m_dx = 0; m_dy = -1;
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
     {
-        dx = 0; dy = 1;
+        m_dx = 0; m_dy = 1;
     }
+}
+
+sf::FloatRect Player::getBounds() const
+{
+    return sf::FloatRect(
+        static_cast<float>(m_x * TILE_SIZE),
+        static_cast<float>(m_y * TILE_SIZE),
+        static_cast<float>(TILE_SIZE),
+        static_cast<float>(TILE_SIZE)
+    );
+}
+
+void Player::setPosition(int x, int y)
+{
+    m_x = x;
+    m_y = y;
+}
+
+// POPRAWKA: Dodana definicja brakuj¹cej funkcji
+void Player::resetDirection()
+{
+    m_dx = 0;
+    m_dy = 0;
 }

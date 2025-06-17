@@ -1,16 +1,11 @@
 #include "SpeedBonus.h"
+#include "Game.h" // Potrzebny do wywo³ania metody na obiekcie gry
 
-SpeedBonus::SpeedBonus(int x, int y) : Bonus(x, y), originalDelay(0.0f) {}
+SpeedBonus::SpeedBonus(int x, int y) : Bonus(x, y) {}
 
-// Zapisujemy oryginalne opóŸnienie i ustawiamy nowe, szybsze
-void SpeedBonus::applySpeedBonus(float& delay) {
-    originalDelay = delay;
-    delay = 0.05f; // Nowa, mniejsza wartoœæ opóŸnienia (wiêksza prêdkoœæ)
-}
-
-// Przywracamy oryginalne opóŸnienie
-void SpeedBonus::resetSpeedBonus(float& delay) {
-    if (originalDelay > 0.0f) { // Upewniamy siê, ¿e mamy zapisan¹ wartoœæ
-        delay = originalDelay;
-    }
+// ZMIANA: Implementacja wirtualnej metody.
+// Logika zosta³a przeniesiona tutaj z Game.cpp, ale zamiast bezpoœrednio
+// modyfikowaæ 'delay', wywo³ujemy publiczn¹ metodê z 'game'.
+void SpeedBonus::applyEffect(Player& player, Game& game) {
+    game.activateSpeedBonus();
 }

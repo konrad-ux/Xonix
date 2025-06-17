@@ -10,21 +10,18 @@ Menu::Menu(float width, float height)
         std::cerr << "B³¹d ³adowania t³a menu2.png\n";
     backgroundSprite.setTexture(backgroundTexture);
 
-    // 0: Start
     menu[0].setFont(font);
     menu[0].setFillColor(sf::Color::Red);
     menu[0].setString("Start");
     menu[0].setCharacterSize(40);
     menu[0].setPosition(width / 2 - 50, height / 2 - 80);
 
-    // 1: Tablica wyników
     menu[1].setFont(font);
     menu[1].setFillColor(sf::Color::White);
     menu[1].setString("Tablica wyników");
     menu[1].setCharacterSize(40);
     menu[1].setPosition(width / 2 - 100, height / 2 - 20);
 
-    // 2: Exit
     menu[2].setFont(font);
     menu[2].setFillColor(sf::Color::White);
     menu[2].setString("Exit");
@@ -57,7 +54,8 @@ void Menu::moveDown()
     }
 }
 
-int Menu::getSelectedItemIndex() const
+// POPRAWKA: Definicja brakuj¹cej funkcji
+Menu::MenuOption Menu::getSelectedItem() const
 {
-    return selectedItemIndex;
+    return static_cast<MenuOption>(selectedItemIndex);
 }

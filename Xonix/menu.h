@@ -4,19 +4,24 @@
 
 class Menu
 {
-private:
-    static const int MAX_ITEMS = 3;
-    int selectedItemIndex;
-    sf::Font font;
-    sf::Text menu[MAX_ITEMS];
-    sf::Texture backgroundTexture;
-    sf::Sprite backgroundSprite;
-
 public:
+    // ZMIANA: U¿ycie enum class dla opcji menu
+    enum class MenuOption { Start, HighScores, Exit, Count };
+
     Menu(float width, float height);
 
     void draw(sf::RenderWindow& window);
     void moveUp();
     void moveDown();
-    int  getSelectedItemIndex() const;
+    MenuOption getSelectedItem() const; // Zwraca teraz typ enum
+
+private:
+    // ZMIANA: MAX_ITEMS jest teraz wyliczane na podstawie enuma
+    static const int MAX_ITEMS = static_cast<int>(MenuOption::Count);
+
+    int selectedItemIndex;
+    sf::Font font;
+    sf::Text menu[MAX_ITEMS];
+    sf::Texture backgroundTexture;
+    sf::Sprite backgroundSprite;
 };

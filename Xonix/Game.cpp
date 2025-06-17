@@ -1,71 +1,128 @@
 #include "Game.h"
 #include "menu.h"
+#include "SpeedBonus.h"
+#include "LineImmunityBonus.h"
+#include "Bomb.h"
+
 #include <fstream>
 #include <algorithm>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <sstream>
+
+// Implementacja przeci¹¿onego operatora dla ScoreEntry (wymaganie "Przeci¹¿enie operatora")
+std::ostream& operator<<(std::ostream& os, const ScoreEntry& score) {
+    os << score.name << " - " << score.score << "%";
+    return os;
+}
 
 Game::Game() :
     m_window(sf::VideoMode(WIDTH_SIZE * 18, HEIGHT_SIZE * 18), "Xonix"),
-    m_timer(0), m_delay(0.07f), m_originalDelay(0.07f), // Poprawna inicjalizacja prêdkoœci
-    m_teleport1(0, 10), m_teleport2(39, 20)
+    m_teleport1(0, 10),
+    m_teleport2(39, 20),
+    m_speedBonusActive(false),
+    m_speedBonusTimer(0.f),
+    m_speedBonusDuration(5.f),
+    m_originalDelay(0.07f),
+    m_lineImmunityActive(false),
+    m_lineImmunityTimer(0.f),
+    m_lineImmunityDuration(5.f),
+    m_timer(0.f),
+    m_delay(0.07f),
+    paintedFields(0),
+    m_newHighScore(false),
+    m_speedBonusSpawnInterval(20.f),
+    m_lineImmunitySpawnInterval(25.f),
+    m_bombSpawnInterval(15.f)
 {
-    srand(time(nullptr));
+    srand(static_cast<unsigned int>(time(nullptr)));
     m_window.setFramerateLimit(60);
 
-    m_t1.loadFromFile("images/solid_tileset.png");
-    m_t2.loadFromFile("images/gameover.png");
-    m_t3.loadFromFile("images/duch.png");
-    m_t4.loadFromFile("images/small_bomb.png");
-    m_t5.loadFromFile("images/youwin.png");
-    m_t6.loadFromFile("images/portal.png");
-    m_t7.loadFromFile("images/apple (2).png");
-    if (!m_t8.loadFromFile("images/banana.png")) {
-        std::cerr << "BLAD: Nie udalo sie zaladowac tekstury images/banana.png!" << std::endl;
+    // £adowanie zasobów za pomoc¹ klasy generycznej ResourceManager (wymaganie "Klasa generyczna")
+    try {
+        m_textureManager.load("tileset", "images/solid_tileset.png");
+        m_textureManager.load("gameover", "images/gameover.png");
+        m_textureManager.load("enemy", "images/duch.png");
+        m_textureManager.load("bomb", "images/small_bomb.png");
+        m_textureManager.load("win", "images/youwin.png");
+        m_textureManager.load("portal", "images/portal.png");
+        m_textureManager.load("speed_bonus", "images/apple (2).png");
+        m_textureManager.load("immunity_bonus", "images/banana.png");
+        m_textureManager.load("menu_bg", "images/menu3.png");
+
+        m_fontManager.load("main_font", "font/agency_fb_bold.ttf");
+
+        m_soundManager.load("teleport", "sounds/teleport_sound.wav");
+        m_soundManager.load("game_over", "sounds/game_over_sound.wav");
+        m_soundManager.load("win_sound", "sounds/winning_sound.wav");
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "Error loading resources: " << e.what() << std::endl;
+        m_window.close(); // Zamknij okno, jeœli zasoby siê nie za³aduj¹
     }
 
-    if (!m_menuBackgroundTexture.loadFromFile("images/menu3.png")) {
-        std::cerr << "B³¹d ³adowania t³a menu3.png\n";
-    }
-    m_menuBackgroundSprite.setTexture(m_menuBackgroundTexture);
+    // Ustawienie zasobów do obiektów gry
+    m_tile.setTexture(m_textureManager.get("tileset"));
+    m_gameOver.setTexture(m_textureManager.get("gameover"));
+    m_gameOver.setPosition(100.f, 100.f);
+    m_win.setTexture(m_textureManager.get("win"));
+    m_win.setPosition(100.f, 0.f);
+    m_enemy.setTexture(m_textureManager.get("enemy"));
+    m_enemy.setOrigin(20.f, 20.f);
+    m_bombSprite.setTexture(m_textureManager.get("bomb"));
+    m_bombSprite.setOrigin(9.f, 9.f);
+    m_speedBonusSprite.setTexture(m_textureManager.get("speed_bonus"));
+    m_lineImmunityBonusSprite.setTexture(m_textureManager.get("immunity_bonus"));
+    s_teleport1.setTexture(m_textureManager.get("portal"));
+    s_teleport2.setTexture(m_textureManager.get("portal"));
+    m_menuBackgroundSprite.setTexture(m_textureManager.get("menu_bg"));
 
-    if (!m_teleportSoundBuffer.loadFromFile("sounds/teleport_sound.wav")) { std::cerr << "B³¹d ³adowania sounds/teleport_sound.wav\n"; }
-    m_teleportSound.setBuffer(m_teleportSoundBuffer);
+    m_teleportSound.setBuffer(m_soundManager.get("teleport"));
     m_teleportSound.setVolume(20);
-
-    if (!m_winningSoundBuffer.loadFromFile("sounds/winning_sound.wav")) { std::cerr << "B³¹d ³adowania sounds/winning_sound.wav\n"; }
-    m_winningSound.setBuffer(m_winningSoundBuffer);
+    m_winningSound.setBuffer(m_soundManager.get("win_sound"));
     m_winningSound.setVolume(30);
-
-    if (!m_gameoverSoundBuffer.loadFromFile("sounds/game_over_sound.wav")) { std::cerr << "B³¹d ³adowania sounds/game_over_sound.wav\n"; }
-    m_gameoverSound.setBuffer(m_gameoverSoundBuffer);
+    m_gameoverSound.setBuffer(m_soundManager.get("game_over"));
     m_gameoverSound.setVolume(30);
 
-    m_tile.setTexture(m_t1);
-    m_gameOver.setTexture(m_t2);
-    m_gameOver.setPosition(100, 100);
-    m_win.setTexture(m_t5);
-    m_win.setPosition(100, 0);
-    m_enemy.setTexture(m_t3);
-    m_enemy.setOrigin(20, 20);
-    m_bonus.setTexture(m_t4);
-    m_bonus.setOrigin(9, 9);
-    m_speedBonusSprite.setTexture(m_t7);
-    m_lineImmunityBonusSprite.setTexture(m_t8);
-    s_teleport1.setTexture(m_t6);
-    s_teleport2.setTexture(m_t6);
+    for (int i = 0; i < 4; ++i) { m_enemies.emplace_back(); }
+}
 
-    if (!m_font.loadFromFile("font/agency_fb_bold.ttf")) {
-        std::cerr << "Nie udalo sie zaladowac czcionki!" << std::endl;
+Game::~Game() {}
+
+void Game::activateSpeedBonus() {
+    if (!m_speedBonusActive) {
+        m_originalDelay = m_delay;
+        m_delay = 0.05f;
+        m_speedBonusActive = true;
+        m_speedBonusTimer = 0.f;
     }
+}
 
+void Game::activateLineImmunity(Player& player) {
+    if (!m_lineImmunityActive) {
+        player.setImmunity(true);
+        m_lineImmunityActive = true;
+        m_lineImmunityTimer = 0.f;
+    }
+}
+
+void Game::triggerBombEffect() {
+    m_board.reset();
+    m_player = Player();
+    m_enemies.clear();
     for (int i = 0; i < 4; ++i) {
         m_enemies.emplace_back();
     }
+    m_bonuses.clear();
+    m_speedBonusClock.restart();
+    m_lineImmunityBonusClock.restart();
+    m_bombClock.restart();
 }
 
 void Game::run() {
     while (m_window.isOpen()) {
-        Menu menu(m_window.getSize().x, m_window.getSize().y);
+        Menu menu(static_cast<float>(m_window.getSize().x), static_cast<float>(m_window.getSize().y));
         bool inMenu = true;
 
         while (inMenu && m_window.isOpen()) {
@@ -76,10 +133,10 @@ void Game::run() {
                     if (event.key.code == sf::Keyboard::Up) menu.moveUp();
                     else if (event.key.code == sf::Keyboard::Down) menu.moveDown();
                     else if (event.key.code == sf::Keyboard::Enter) {
-                        int selected = menu.getSelectedItemIndex();
-                        if (selected == 0) inMenu = false;
-                        else if (selected == 1) showHighScores();
-                        else if (selected == 2) { m_window.close(); return; }
+                        Menu::MenuOption selected = menu.getSelectedItem();
+                        if (selected == Menu::MenuOption::Start) inMenu = false;
+                        else if (selected == Menu::MenuOption::HighScores) showHighScores();
+                        else if (selected == Menu::MenuOption::Exit) { m_window.close(); return; }
                     }
                 }
             }
@@ -91,114 +148,65 @@ void Game::run() {
         m_board.reset();
         m_player = Player();
         m_bonuses.clear();
-        m_speedBonuses.clear();
-        m_lineImmunityBonuses.clear();
         m_enemies.clear();
         for (int i = 0; i < 4; ++i) m_enemies.emplace_back();
 
-        m_player.alive = true;
-        m_player.win = false;
+        m_clock.restart(); m_timer = 0.f;
+        tenSecondsClock.restart(); m_speedBonusClock.restart(); m_lineImmunityBonusClock.restart(); m_bombClock.restart();
 
-        m_speedBonusActive = false;
-        m_speedBonusTimer = 0.f;
-        m_delay = 0.07f;
-        m_originalDelay = m_delay;
-
-        m_lineImmunityActive = false;
-        m_lineImmunityTimer = 0.f;
-
-        m_clock.restart();
-        m_timer = 0;
-        tenSecondsClock.restart();
-        m_speedBonusClock.restart();
-        m_lineImmunityBonusClock.restart();
-
-        while (m_window.isOpen() && m_player.alive && !m_player.win) {
-            const float time = m_clock.getElapsedTime().asSeconds();
+        while (m_window.isOpen() && m_player.isAlive() && !m_player.hasWon()) {
+            float time = m_clock.getElapsedTime().asSeconds();
             m_clock.restart();
             m_timer += time;
 
             handleEvents();
 
-            if (tenSecondsClock.getElapsedTime().asSeconds() >= 7.f) {
-                m_bonuses.emplace_back(rand() % (WIDTH_SIZE - 2) + 1, rand() % (HEIGHT_SIZE - 2) + 1);
-                tenSecondsClock.restart();
+            if (m_bombClock.getElapsedTime().asSeconds() >= m_bombSpawnInterval) {
+                m_bonuses.push_back(std::make_unique<Bomb>(rand() % (WIDTH_SIZE - 2) + 1, rand() % (HEIGHT_SIZE - 2) + 1));
+                m_bombClock.restart();
             }
             if (m_speedBonusClock.getElapsedTime().asSeconds() >= m_speedBonusSpawnInterval) {
-                m_speedBonuses.emplace_back(rand() % (WIDTH_SIZE - 2) + 1, rand() % (HEIGHT_SIZE - 2) + 1);
+                m_bonuses.push_back(std::make_unique<SpeedBonus>(rand() % (WIDTH_SIZE - 2) + 1, rand() % (HEIGHT_SIZE - 2) + 1));
                 m_speedBonusClock.restart();
             }
             if (m_lineImmunityBonusClock.getElapsedTime().asSeconds() >= m_lineImmunitySpawnInterval) {
-                m_lineImmunityBonuses.emplace_back(rand() % (WIDTH_SIZE - 2) + 1, rand() % (HEIGHT_SIZE - 2) + 1);
+                m_bonuses.push_back(std::make_unique<LineImmunityBonus>(rand() % (WIDTH_SIZE - 2) + 1, rand() % (HEIGHT_SIZE - 2) + 1));
                 m_lineImmunityBonusClock.restart();
             }
 
+            checkPlayerBonusCollision();
             checkPlayerTeleportCollision(m_player, m_teleport1, m_teleport2);
-
-            checkPlayerBonusCollisionGeneric(m_player, m_bonuses, [this](Bonus&, Player&) {
-                m_board.reset(); m_player = Player(); m_gameoverSound.play();
-                });
-
-            checkPlayerBonusCollisionGeneric(m_player, m_speedBonuses, [this](SpeedBonus& speedBonus, Player& player) {
-                if (!m_speedBonusActive) {
-                    m_originalDelay = m_delay;
-                    speedBonus.applySpeedBonus(m_delay);
-                    m_speedBonusActive = true;
-                    m_speedBonusTimer = 0.f;
-                }
-                });
-
-            checkPlayerBonusCollisionGeneric(m_player, m_lineImmunityBonuses, [this](LineImmunityBonus& bonus, Player& player) {
-                if (!m_lineImmunityActive) {
-                    bonus.applyEffect(player);
-                    m_lineImmunityActive = true;
-                    m_lineImmunityTimer = 0.f;
-                }
-                });
 
             if (m_speedBonusActive) {
                 m_speedBonusTimer += time;
-                if (m_speedBonusTimer >= m_speedBonusDuration) {
-                    m_delay = m_originalDelay;
-                    m_speedBonusActive = false;
-                }
+                if (m_speedBonusTimer >= m_speedBonusDuration) { m_delay = m_originalDelay; m_speedBonusActive = false; }
             }
-
             if (m_lineImmunityActive) {
                 m_lineImmunityTimer += time;
-                if (m_lineImmunityTimer >= m_lineImmunityDuration) {
-                    m_player.isImmune = false;
-                    m_lineImmunityActive = false;
-                }
+                if (m_lineImmunityTimer >= m_lineImmunityDuration) { m_player.setImmunity(false); m_lineImmunityActive = false; }
             }
 
             m_player.handleInput();
             m_player.move(m_board, m_timer, m_delay);
 
-            for (auto& enemy : m_enemies) {
-                enemy.move(m_board.grid);
-            }
+            for (auto& enemy : m_enemies) { enemy.move(m_board.grid); }
 
-            if (m_board.grid[m_player.y][m_player.x] == 1) {
-                m_player.dx = m_player.dy = 0;
+            if (m_board.grid[m_player.getY()][m_player.getX()] == 1) {
+                m_player.resetDirection();
                 for (const auto& enemy : m_enemies) { m_board.drop(enemy.y / 18, enemy.x / 18); }
                 m_board.finalize();
             }
-            for (const auto& enemy : m_enemies) {
-                if (m_board.grid[enemy.y / 18][enemy.x / 18] == 2) { m_player.alive = false; }
-            }
+            for (const auto& enemy : m_enemies) { if (m_board.grid[enemy.y / 18][enemy.x / 18] == 2) { m_player.setAlive(false); } }
             draw();
         }
 
-        if (!m_player.alive) m_gameoverSound.play();
-        else if (m_player.win) m_winningSound.play();
+        if (!m_player.isAlive()) m_gameoverSound.play();
+        else if (m_player.hasWon()) m_winningSound.play();
 
         sf::Clock endClock;
-        while (endClock.getElapsedTime().asSeconds() < 2.0f && m_window.isOpen()) {
-            m_window.clear(); draw(); m_window.display();
-        }
+        while (endClock.getElapsedTime().asSeconds() < 2.0f && m_window.isOpen()) { m_window.clear(); draw(); m_window.display(); }
 
-        if (m_player.win || !m_player.alive) {
+        if (m_player.hasWon() || !m_player.isAlive()) {
             m_playerName = askPlayerName();
             if (!m_playerName.empty()) { saveScoreToFile(m_playerName, calculatePaintedFields()); }
         }
@@ -219,28 +227,36 @@ void Game::draw() {
             if (m_board.grid[i][j] == 0) continue;
             if (m_board.grid[i][j] == 1) m_tile.setTextureRect(sf::IntRect(0, 36, 18, 18));
             if (m_board.grid[i][j] == 2) m_tile.setTextureRect(sf::IntRect(0, 90, 18, 18));
-            m_tile.setPosition(j * 18, i * 18);
+            m_tile.setPosition(static_cast<float>(j * 18), static_cast<float>(i * 18));
             m_window.draw(m_tile);
         }
     }
 
     for (const auto& bonus : m_bonuses) {
-        m_bonus.setPosition(bonus.getX() * 18, bonus.getY() * 18);
-        m_window.draw(m_bonus);
-    }
-    for (const auto& bonus : m_speedBonuses) {
-        m_speedBonusSprite.setPosition(bonus.getX() * 18, bonus.getY() * 18);
-        m_window.draw(m_speedBonusSprite);
-    }
-    for (const auto& bonus : m_lineImmunityBonuses) {
-        m_lineImmunityBonusSprite.setPosition(bonus.getX() * 18, bonus.getY() * 18);
-        m_window.draw(m_lineImmunityBonusSprite);
+        sf::Sprite* bonusSprite = nullptr;
+        if (dynamic_cast<Bomb*>(bonus.get())) {
+            bonusSprite = &m_bombSprite;
+        }
+        else if (dynamic_cast<SpeedBonus*>(bonus.get())) {
+            bonusSprite = &m_speedBonusSprite;
+        }
+        else if (dynamic_cast<LineImmunityBonus*>(bonus.get())) {
+            bonusSprite = &m_lineImmunityBonusSprite;
+        }
+        if (bonusSprite) {
+            bonusSprite->setPosition(static_cast<float>(bonus->getX() * 18), static_cast<float>(bonus->getY() * 18));
+            m_window.draw(*bonusSprite);
+        }
     }
 
-    s_teleport1.setPosition(m_teleport1.m_x * 18, m_teleport1.m_y * 18); m_window.draw(s_teleport1);
-    s_teleport2.setPosition(m_teleport2.m_x * 18, m_teleport2.m_y * 18); m_window.draw(s_teleport2);
+    s_teleport1.setPosition(static_cast<float>(m_teleport1.getX() * 18), static_cast<float>(m_teleport1.getY() * 18));
+    m_window.draw(s_teleport1);
+    s_teleport2.setPosition(static_cast<float>(m_teleport2.getX() * 18), static_cast<float>(m_teleport2.getY() * 18));
+    m_window.draw(s_teleport2);
+
     m_tile.setTextureRect(sf::IntRect(0, 18, 18, 18));
-    m_tile.setPosition(m_player.x * 18, m_player.y * 18); m_window.draw(m_tile);
+    m_tile.setPosition(static_cast<float>(m_player.getX() * 18), static_cast<float>(m_player.getY() * 18));
+    m_window.draw(m_tile);
 
     sf::RectangleShape blackBar(sf::Vector2f(155.f, 47.f));
     blackBar.setFillColor(sf::Color::Black);
@@ -251,7 +267,7 @@ void Game::draw() {
 
     paintedFields = calculatePaintedFields();
     sf::Text paintedFieldsText;
-    paintedFieldsText.setFont(m_font);
+    paintedFieldsText.setFont(m_fontManager.get("main_font"));
     paintedFieldsText.setCharacterSize(35);
     paintedFieldsText.setFillColor(sf::Color::White);
     paintedFieldsText.setStyle(sf::Text::Bold);
@@ -261,12 +277,51 @@ void Game::draw() {
 
     m_enemy.rotate(5);
     for (const auto& enemy : m_enemies) {
-        m_enemy.setPosition(enemy.x, enemy.y);
+        m_enemy.setPosition(static_cast<float>(enemy.x), static_cast<float>(enemy.y));
         m_window.draw(m_enemy);
     }
-    if (!m_player.alive) m_window.draw(m_gameOver);
-    if (m_player.win) m_window.draw(m_win);
+    if (!m_player.isAlive()) m_window.draw(m_gameOver);
+    if (m_player.hasWon()) m_window.draw(m_win);
     m_window.display();
+}
+
+void Game::checkPlayerBonusCollision() {
+    sf::FloatRect playerBounds = m_player.getBounds();
+    auto it = m_bonuses.begin();
+    while (it != m_bonuses.end()) {
+        if (playerBounds.intersects((*it)->getBounds())) {
+            bool isBomb = (dynamic_cast<Bomb*>(it->get()) != nullptr);
+            (*it)->applyEffect(m_player, *this);
+            if (isBomb) {
+                break;
+            }
+            else {
+                it = m_bonuses.erase(it);
+            }
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+void Game::checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Teleport& teleport2) {
+    static bool isTeleported = false;
+    bool isInPortal1 = player.getX() == teleport1.getX() && player.getY() == teleport1.getY();
+    bool isInPortal2 = player.getX() == teleport2.getX() && player.getY() == teleport2.getY();
+    if (!isTeleported && isInPortal1) {
+        isTeleported = true;
+        player.setPosition(teleport2.getX(), teleport2.getY());
+        m_teleportSound.play();
+    }
+    else if (!isTeleported && isInPortal2) {
+        isTeleported = true;
+        player.setPosition(teleport1.getX(), teleport1.getY());
+        m_teleportSound.play();
+    }
+    else if (isTeleported && !(isInPortal1 || isInPortal2)) {
+        isTeleported = false;
+    }
 }
 
 int Game::calculatePaintedFields() {
@@ -278,117 +333,50 @@ int Game::calculatePaintedFields() {
         }
     }
     int score = static_cast<int>((paintedCount / totalCount) * 100);
-    if (score >= 80) m_player.win = true;
+    if (score >= 80) m_player.setWin(true);
     return score > 0 ? score : 0;
-}
-
-template<typename TBonus, typename TEffect>
-void Game::checkPlayerBonusCollisionGeneric(Player& player, std::vector<TBonus>& bonuses, TEffect effect) {
-    m_tile.setTextureRect(sf::IntRect(0, 18, 18, 18));
-    m_tile.setPosition(player.x * 18, player.y * 18);
-    sf::FloatRect playerBounds = m_tile.getGlobalBounds();
-    for (auto it = bonuses.begin(); it != bonuses.end(); ) {
-        sf::FloatRect bonusBounds;
-        if constexpr (std::is_same<TBonus, SpeedBonus>::value) {
-            m_speedBonusSprite.setPosition(it->getX() * 18, it->getY() * 18);
-            bonusBounds = m_speedBonusSprite.getGlobalBounds();
-        }
-        else if constexpr (std::is_same<TBonus, LineImmunityBonus>::value) {
-            m_lineImmunityBonusSprite.setPosition(it->getX() * 18, it->getY() * 18);
-            bonusBounds = m_lineImmunityBonusSprite.getGlobalBounds();
-        }
-        else {
-            m_bonus.setPosition(it->getX() * 18, it->getY() * 18);
-            bonusBounds = m_bonus.getGlobalBounds();
-        }
-        if (playerBounds.intersects(bonusBounds)) {
-            effect(*it, player);
-            it = bonuses.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
-}
-
-void Game::checkPlayerTeleportCollision(Player& player, Teleport& teleport1, Teleport& teleport2) {
-    static bool isTeleported = false;
-    bool isInPortal1 = player.x == teleport1.m_x && player.y == teleport1.m_y;
-    bool isInPortal2 = player.x == teleport2.m_x && player.y == teleport2.m_y;
-    if (!isTeleported && isInPortal1) {
-        isTeleported = true; player.x = teleport2.m_x; player.y = teleport2.m_y; m_teleportSound.play();
-    }
-    else if (!isTeleported && isInPortal2) {
-        isTeleported = true; player.x = teleport1.m_x; player.y = teleport1.m_y; m_teleportSound.play();
-    }
-    else if (isTeleported && !(isInPortal1 || isInPortal2)) {
-        isTeleported = false;
-    }
 }
 
 void Game::saveScoreToFile(const std::string& name, int score) {
     std::ofstream file("score.txt", std::ios::app);
-    if (file.is_open()) {
-        file << name << " - " << score << "%" << std::endl;
-    }
-    else {
-        std::cerr << "Nie mo¿na zapisaæ wyniku do pliku!" << std::endl;
-    }
+    if (file.is_open()) { file << name << " - " << score << "%" << std::endl; }
+    else { std::cerr << "Nie mo¿na zapisaæ wyniku do pliku!" << std::endl; }
 }
 
-std::string Game::askPlayerName()
-{
+std::string Game::askPlayerName() {
     sf::Text prompt, inputText;
-    prompt.setFont(m_font); inputText.setFont(m_font);
+    prompt.setFont(m_fontManager.get("main_font"));
+    inputText.setFont(m_fontManager.get("main_font"));
     prompt.setCharacterSize(30); inputText.setCharacterSize(30);
     prompt.setFillColor(sf::Color::White); inputText.setFillColor(sf::Color::Yellow);
     prompt.setString("Podaj imie:");
     prompt.setPosition(150.f, 200.f); inputText.setPosition(150.f, 250.f);
     std::string input;
-
     while (m_window.isOpen()) {
         sf::Event event;
         while (m_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                m_window.close();
-                return ""; // Zwróæ pusty ci¹g, jeœli okno zostanie zamkniête
-            }
-
-            // Obs³uga wpisywania tekstu
+            if (event.type == sf::Event::Closed) { m_window.close(); return ""; }
             if (event.type == sf::Event::TextEntered) {
-                // Backspace
-                if (event.text.unicode == '\b' && !input.empty()) {
-                    input.pop_back();
-                }
-                // Zwyk³e znaki (ignoruje Enter i inne znaki kontrolne)
+                if (event.text.unicode == '\b' && !input.empty()) { input.pop_back(); }
                 else if (event.text.unicode >= 32 && event.text.unicode < 128 && input.size() < 15) {
                     input += static_cast<char>(event.text.unicode);
                 }
             }
-
-            // Obs³uga klawiszy specjalnych
             if (event.type == sf::Event::KeyPressed) {
-                // ZatwierdŸ nazwê enterem
-                if (event.key.code == sf::Keyboard::Enter && !input.empty()) {
-                    return input;
-                }
-                // NOWA FUNKCJA: Powrót do menu po naciœniêciu Escape
-                if (event.key.code == sf::Keyboard::Escape) {
-                    return ""; // Zwrócenie pustego imienia przerwie zapis i wróci do menu
-                }
+                if (event.key.code == sf::Keyboard::Enter && !input.empty()) { return input; }
+                if (event.key.code == sf::Keyboard::Escape) { return ""; }
             }
         }
-
         inputText.setString(input);
-
         m_window.clear();
         m_window.draw(m_menuBackgroundSprite);
         m_window.draw(prompt);
         m_window.draw(inputText);
         m_window.display();
     }
-    return ""; // Zwróæ pusty ci¹g na wszelki wypadek
+    return "";
 }
+
 std::vector<ScoreEntry> Game::loadHighScores() {
     std::ifstream file("score.txt");
     std::vector<ScoreEntry> all;
@@ -411,29 +399,37 @@ void Game::showHighScores() {
     auto highs = loadHighScores();
     std::vector<sf::Text> texts;
     sf::Text title;
-    title.setFont(m_font);
+    title.setFont(m_fontManager.get("main_font"));
     title.setCharacterSize(50);
     title.setFillColor(sf::Color::White);
     title.setString("Top 5");
     sf::FloatRect textRect = title.getLocalBounds();
     title.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-    title.setPosition(m_window.getSize().x / 2.0f, 100);
+    title.setPosition(m_window.getSize().x / 2.0f, 100.f);
     texts.push_back(title);
 
     for (size_t i = 0; i < highs.size(); ++i) {
         sf::Text t;
-        t.setFont(m_font); t.setCharacterSize(35); t.setFillColor(sf::Color::White);
-        t.setString(std::to_string(i + 1) + ". " + highs[i].name + " - " + std::to_string(highs[i].score) + "%");
-        t.setPosition(150, 180 + i * 50);
+        t.setFont(m_fontManager.get("main_font"));
+        t.setCharacterSize(35);
+        t.setFillColor(sf::Color::White);
+
+        std::stringstream ss;
+        ss << i + 1 << ". " << highs[i]; // U¿ycie przeci¹¿onego operatora
+        t.setString(ss.str());
+
+        t.setPosition(150.f, 180.f + static_cast<float>(i * 50));
         texts.push_back(t);
     }
 
     sf::Text back;
-    back.setFont(m_font); back.setCharacterSize(25); back.setFillColor(sf::Color::Yellow);
+    back.setFont(m_fontManager.get("main_font"));
+    back.setCharacterSize(25);
+    back.setFillColor(sf::Color::Yellow);
     back.setString("Wcisnij Esc lub Enter, aby wrocic");
     sf::FloatRect backRect = back.getLocalBounds();
     back.setOrigin(backRect.left + backRect.width / 2.0f, backRect.top + backRect.height / 2.0f);
-    back.setPosition(m_window.getSize().x / 2.0f, 500);
+    back.setPosition(m_window.getSize().x / 2.0f, 500.f);
 
     bool showingScores = true;
     while (m_window.isOpen() && showingScores) {
@@ -452,3 +448,6 @@ void Game::showHighScores() {
     }
 }
 
+int Game::loadLastScoreFromFile() {
+    return 0; // Ta metoda nie jest u¿ywana, mo¿na j¹ zaimplementowaæ w przysz³oœci
+}

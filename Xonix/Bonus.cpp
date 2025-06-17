@@ -1,12 +1,13 @@
-#include"Bonus.h"
+#include "Bonus.h"
 
-Bonus::Bonus(int x, int y) : m_x(x), m_y(y) {};
+Bonus::Bonus(int x, int y) : m_x(x), m_y(y) {}
 
-void Bonus::setPosition(int x, int y)
+sf::FloatRect Bonus::getBounds() const
 {
-    m_x = x;
-    m_y = y;
+    return sf::FloatRect(
+        static_cast<float>(m_x * TILE_SIZE),
+        static_cast<float>(m_y * TILE_SIZE),
+        static_cast<float>(TILE_SIZE),
+        static_cast<float>(TILE_SIZE)
+    );
 }
-
-
-
