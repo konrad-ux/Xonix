@@ -275,7 +275,9 @@ void Game::draw() {
     paintedFieldsText.setPosition(18.f, 6.f);
     m_window.draw(paintedFieldsText);
 
-    m_enemy.rotate(5);
+    if (m_player.isAlive()) {
+        m_enemy.rotate(5);
+    }
     for (const auto& enemy : m_enemies) {
         m_enemy.setPosition(static_cast<float>(enemy.x), static_cast<float>(enemy.y));
         m_window.draw(m_enemy);
