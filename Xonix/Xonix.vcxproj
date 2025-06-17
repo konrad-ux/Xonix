@@ -146,6 +146,7 @@
     <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="LineImmunityBonus.cpp" />
     <ClCompile Include="menu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SpeedBonus.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Bonus.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="LineImmunityBonus.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SpeedBonus.h" />

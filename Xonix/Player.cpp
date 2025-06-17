@@ -1,7 +1,7 @@
 #include "Player.h"
 #include <SFML/Window/Keyboard.hpp>
 
-Player::Player() : x(9), y(3), dx(0), dy(0), alive(true), win(false)
+Player::Player() : x(9), y(3), dx(0), dy(0), alive(true), win(false), isImmune(false) // Inicjalizacja isImmune
 {
     //puste cialo
 }
@@ -33,7 +33,7 @@ void Player::move(Board& board, float& timer, const float delay)
             y = HEIGHT_SIZE - 1;
         }
 
-        if (board.grid[y][x] == 2)     //kolizja z wlasnym sladem
+        if (board.grid[y][x] == 2 && !isImmune)     // Kolizja z w³asnym œladem tylko, gdy gracz nie jest nietykalny
         {
             alive = false;
         }
@@ -66,4 +66,3 @@ void Player::handleInput()
         dx = 0; dy = 1;
     }
 }
-

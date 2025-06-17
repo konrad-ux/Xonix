@@ -1,10 +1,16 @@
-#include"SpeedBonus.h"
+#include "SpeedBonus.h"
 
-void SpeedBonus::applySpeedBonus(Player& player) {
-	player.dx *= 2; // Zwiêkszenie prêdkoœci w poziomie
-	player.dy *= 2; // Zwiêkszenie prêdkoœci w pionie
+SpeedBonus::SpeedBonus(int x, int y) : Bonus(x, y), originalDelay(0.0f) {}
+
+// Zapisujemy oryginalne opóŸnienie i ustawiamy nowe, szybsze
+void SpeedBonus::applySpeedBonus(float& delay) {
+    originalDelay = delay;
+    delay = 0.05f; // Nowa, mniejsza wartoœæ opóŸnienia (wiêksza prêdkoœæ)
 }
-void SpeedBonus::resetSpeedBonus(Player& player) {
-	player.dx /= 2; // Przywrócenie prêdkoœci w poziomie
-	player.dy /= 2; // Przywrócenie prêdkoœci w pionie
+
+// Przywracamy oryginalne opóŸnienie
+void SpeedBonus::resetSpeedBonus(float& delay) {
+    if (originalDelay > 0.0f) { // Upewniamy siê, ¿e mamy zapisan¹ wartoœæ
+        delay = originalDelay;
+    }
 }

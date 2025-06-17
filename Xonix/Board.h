@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 
-constexpr int HEIGHT_SIZE = 25;     //zmienne stale podczas kompilacji(rozmiary okna i kafelka)
+constexpr int HEIGHT_SIZE = 40;     //zmienne stale podczas kompilacji(rozmiary okna i kafelka)
 constexpr int WIDTH_SIZE = 40;
 constexpr int TILE_SIZE = 18;
 
