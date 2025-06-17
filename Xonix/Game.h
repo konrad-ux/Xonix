@@ -49,7 +49,6 @@ private:
     void showHighScores();
     std::string askPlayerName();
     void saveScoreToFile(const std::string& name, int score);
-    int loadLastScoreFromFile();
 
 private:
     Board                  m_board;
