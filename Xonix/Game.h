@@ -17,14 +17,13 @@
 #include <fstream>
 #include <algorithm>
 #include <memory>
-#include <ostream> // Dodaj ten nag³ówek
+#include <ostream>
 
 struct ScoreEntry {
     std::string name;
     int score = 0;
 };
 
-// Deklaracja przeci¹¿onego operatora
 std::ostream& operator<<(std::ostream& os, const ScoreEntry& score);
 
 class Game
@@ -68,14 +67,11 @@ private:
     float m_lineImmunityTimer;
     const float m_lineImmunityDuration;
 
-    // NOWE MENED¯ERY ZASOBÓW
     ResourceManager<sf::Texture>     m_textureManager;
     ResourceManager<sf::Font>        m_fontManager;
     ResourceManager<sf::SoundBuffer> m_soundManager;
 
     sf::RenderWindow        m_window;
-    // Stare pola na zasoby (t1, t2, font, etc.) zosta³y usuniête
-    // Zostawiamy tylko obiekty, które z nich korzystaj¹ (Sprite, Sound, Text)
     sf::Sprite              m_tile, m_gameOver, m_enemy, m_bombSprite, m_win, s_teleport1, s_teleport2, m_speedBonusSprite, m_lineImmunityBonusSprite;
     sf::Sound               m_teleportSound, m_gameoverSound, m_winningSound;
     sf::Sprite              m_menuBackgroundSprite;

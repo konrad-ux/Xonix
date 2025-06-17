@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <sstream>
 
-// Implementacja przeci¹¿onego operatora dla ScoreEntry (wymaganie "Przeci¹¿enie operatora")
 std::ostream& operator<<(std::ostream& os, const ScoreEntry& score) {
     os << score.name << " - " << score.score << "%";
     return os;
@@ -32,9 +31,9 @@ Game::Game() :
     m_delay(0.07f),
     paintedFields(0),
     m_newHighScore(false),
-    m_speedBonusSpawnInterval(20.f),
-    m_lineImmunitySpawnInterval(25.f),
-    m_bombSpawnInterval(15.f)
+    m_speedBonusSpawnInterval(18.f),
+    m_lineImmunitySpawnInterval(20.f),
+    m_bombSpawnInterval(13.f)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
     m_window.setFramerateLimit(60);
@@ -47,8 +46,8 @@ Game::Game() :
         m_textureManager.load("bomb", "images/small_bomb.png");
         m_textureManager.load("win", "images/youwin.png");
         m_textureManager.load("portal", "images/portal.png");
-        m_textureManager.load("speed_bonus", "images/apple (2).png");
-        m_textureManager.load("immunity_bonus", "images/banana.png");
+        m_textureManager.load("speed_bonus", "images/small_apple.png");
+        m_textureManager.load("immunity_bonus", "images/banana (1).png");
         m_textureManager.load("menu_bg", "images/background.png");
 
         m_fontManager.load("main_font", "font/agency_fb_bold.ttf");
@@ -59,10 +58,9 @@ Game::Game() :
     }
     catch (const std::runtime_error& e) {
         std::cerr << "Error loading resources: " << e.what() << std::endl;
-        m_window.close(); // Zamknij okno, jeœli zasoby siê nie za³aduj¹
+        m_window.close();
     }
 
-    // Ustawienie zasobów do obiektów gry
     m_tile.setTexture(m_textureManager.get("tileset"));
     m_gameOver.setTexture(m_textureManager.get("gameover"));
     m_gameOver.setPosition(125.f, 250.f);
