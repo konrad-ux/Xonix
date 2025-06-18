@@ -1,11 +1,7 @@
 #include "Teleport.h"
+#include "Game.h"
+#include "Player.h"
 
-Teleport::Teleport(int x, int y)
-    : Bonus(x, y)
-{
-}
+Teleport::Teleport(int x, int y) : Bonus(x, y) {}
 
-void Teleport::applyEffect(Player& player, Game& game)
-{
-    // Puste, logika jest w Game::checkPlayerTeleportCollision
-}
+void Teleport::applyEffect(Player& player, Game& game) {}

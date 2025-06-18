@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Bonus.h"
 
 class Bomb : public Bonus {

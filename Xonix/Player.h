@@ -1,24 +1,22 @@
 #pragma once
+
 #include "Board.h"
 #include <SFML/Graphics/Rect.hpp>
 
-class Player
-{
+class Player {
 public:
     Player();
 
     void move(Board& board, float& timer, float delay);
     void handleInput();
 
-    // --- Metody dostêpu (Gettery) ---
     int getX() const { return m_x; }
     int getY() const { return m_y; }
-    int getDx() const { return m_dx; } // Dodany getter
-    int getDy() const { return m_dy; } // Dodany getter
+    int getDx() const { return m_dx; }
+    int getDy() const { return m_dy; }
 
-    // --- Metody modyfikuj¹ce (Settery) ---
     void setPosition(int x, int y);
-    void resetDirection(); // ZMIANA: Zamiast setDx/setDy
+    void resetDirection();
 
     bool isAlive() const { return m_alive; }
     void setAlive(bool isAlive) { m_alive = isAlive; }
@@ -33,6 +31,7 @@ public:
 
 private:
     int m_x, m_y, m_dx, m_dy;
-    bool m_alive, m_win;
+    bool m_alive;
+    bool m_win;
     bool m_isImmune;
 };

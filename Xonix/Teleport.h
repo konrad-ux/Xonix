@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Bonus.h"
 
 class Teleport : public Bonus {

@@ -1,5 +1,6 @@
 #include "LineImmunityBonus.h"
-#include "Game.h" 
+#include "Game.h"
+#include "Player.h"
 
 LineImmunityBonus::LineImmunityBonus(int x, int y) : Bonus(x, y) {}
 
