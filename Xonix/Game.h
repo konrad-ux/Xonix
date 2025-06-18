@@ -56,6 +56,7 @@ private:
     const float m_speedBonusDuration;
     float m_originalDelay;
 
+    bool m_showEasterEgg;
     bool m_lineImmunityActive;
     float m_lineImmunityTimer;
     const float m_lineImmunityDuration;
@@ -75,6 +76,7 @@ private:
     sf::Sprite m_speedBonusSprite;
     sf::Sprite m_lineImmunityBonusSprite;
     sf::Sprite m_menuBackgroundSprite;
+    sf::Sprite m_easterEggSprite;
 
     sf::Sound m_teleportSound;
     sf::Sound m_gameoverSound;

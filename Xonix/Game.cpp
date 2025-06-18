@@ -34,7 +34,8 @@ Game::Game() :
     m_newHighScore(false),
     m_speedBonusSpawnInterval(20.f),
     m_lineImmunitySpawnInterval(25.f),
-    m_bombSpawnInterval(15.f)
+    m_bombSpawnInterval(15.f),
+    m_showEasterEgg(false)
 {
 	srand(static_cast<unsigned int>(time(nullptr)));    // Seed the random number generator
     m_window.setFramerateLimit(60);
@@ -50,6 +51,7 @@ Game::Game() :
         m_textureManager.load("speed_bonus", "images/small_apple.png");
         m_textureManager.load("immunity_bonus", "images/banana (1).png");
         m_textureManager.load("menu_bg", "images/background.png");
+        m_textureManager.load("easter_egg_graphic", "images/adas.png");
 
         m_fontManager.load("main_font", "font/agency_fb_bold.ttf");
 
@@ -84,6 +86,10 @@ Game::Game() :
     m_winningSound.setVolume(30);
     m_gameoverSound.setBuffer(m_soundManager.get("game_over"));
     m_gameoverSound.setVolume(30);
+
+    m_easterEggSprite.setTexture(m_textureManager.get("easter_egg_graphic")); //
+    m_easterEggSprite.setOrigin(m_easterEggSprite.getGlobalBounds().width / 2.f, m_easterEggSprite.getGlobalBounds().height / 2.f);
+    m_easterEggSprite.setPosition(static_cast<float>(m_window.getSize().x / 2.f), static_cast<float>(m_window.getSize().y / 2.f));
 
     for (int i = 0; i < 4; ++i)
     {
@@ -306,6 +312,11 @@ void Game::handleEvents()
             m_window.close();
         }
     }
+
+    if (event.key.code == sf::Keyboard::R)
+    {
+        m_showEasterEgg = !m_showEasterEgg;
+    }
 }
 
 void Game::draw()
@@ -371,6 +382,10 @@ void Game::draw()
     paintedFieldsText.setPosition(13.f, 6.f);
     m_window.draw(paintedFieldsText);
 
+    if (m_showEasterEgg)
+    {
+        m_window.draw(m_easterEggSprite);
+    }
     if (m_player.isAlive())
     {
         m_enemy.rotate(5);
