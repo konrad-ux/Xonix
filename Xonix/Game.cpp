@@ -47,8 +47,8 @@ Game::Game() :
         m_textureManager.load("bomb", "images/small_bomb.png");
         m_textureManager.load("win", "images/youwin.png");
         m_textureManager.load("portal", "images/portal.png");
-        m_textureManager.load("speed_bonus", "images/apple (2).png");
-        m_textureManager.load("immunity_bonus", "images/banana.png");
+        m_textureManager.load("speed_bonus", "images/small_apple.png");
+        m_textureManager.load("immunity_bonus", "images/banana (1).png");
         m_textureManager.load("menu_bg", "images/background.png");
 
         m_fontManager.load("main_font", "font/agency_fb_bold.ttf");
