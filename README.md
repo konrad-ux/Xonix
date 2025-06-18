@@ -16,3 +16,5 @@ Aby uruchomić program postępuj zgodnie z instrukcjami
 
 Program jest gotowy do uruchomienia.
 
+Źródła grafik:
+https://displayname1166.itch.io/pixel-art-food-icon-pack
