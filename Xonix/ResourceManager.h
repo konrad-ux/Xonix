@@ -10,7 +10,7 @@ class ResourceManager {
 public:
     void load(const std::string& id, const std::string& filename)
     {
-        auto resource = std::make_unique<Resource>();
+        auto resource = std::make_unique<Resource>();       // Create a unique pointer for the resource
         if (!resource->loadFromFile(filename))
         {
             throw std::runtime_error("ResourceManager::load - Failed to load " + filename);
@@ -18,7 +18,7 @@ public:
         m_resources.emplace(id, std::move(resource));
     }
 
-    Resource& get(const std::string& id)
+	Resource& get(const std::string& id)    // return reference, non-const version, read and change
     {
         auto found = m_resources.find(id);
         if (found == m_resources.end())
@@ -28,7 +28,7 @@ public:
         return *found->second;
     }
 
-    const Resource& get(const std::string& id) const
+    const Resource& get(const std::string& id) const    // return reference, non-const version, read only
     {
         auto found = m_resources.find(id);
         if (found == m_resources.end())

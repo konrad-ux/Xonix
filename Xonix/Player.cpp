@@ -19,6 +19,13 @@ void Player::move(Board& board, float& timer, float delay)
         m_x += m_dx;
         m_y += m_dy;
 
+        if (m_x <= 8 && m_y <= 2) {
+            m_x -= m_dx;
+            m_y -= m_dy;
+            m_dx = 0;
+            m_dy = 0;
+        }
+
         if (m_x < 0) m_x = 0;
         if (m_x >= WIDTH_SIZE) m_x = WIDTH_SIZE - 1;
         if (m_y < 0) m_y = 0;

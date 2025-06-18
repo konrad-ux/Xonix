@@ -36,7 +36,7 @@ Game::Game() :
     m_lineImmunitySpawnInterval(25.f),
     m_bombSpawnInterval(15.f)
 {
-    srand(static_cast<unsigned int>(time(nullptr)));
+	srand(static_cast<unsigned int>(time(nullptr)));    // Seed the random number generator
     m_window.setFramerateLimit(60);
 
     try
@@ -368,7 +368,7 @@ void Game::draw()
     paintedFieldsText.setFillColor(sf::Color::White);
     paintedFieldsText.setStyle(sf::Text::Bold);
     paintedFieldsText.setString("Score: " + std::to_string(paintedFields) + "%");
-    paintedFieldsText.setPosition(18.f, 6.f);
+    paintedFieldsText.setPosition(13.f, 6.f);
     m_window.draw(paintedFieldsText);
 
     if (m_player.isAlive())
@@ -455,7 +455,7 @@ int Game::calculatePaintedFields()
         }
     }
     int score = static_cast<int>((paintedCount / totalCount) * 100);
-    if (score >= 80)
+    if (score >= 95)
     {
         m_player.setWin(true);
     }
